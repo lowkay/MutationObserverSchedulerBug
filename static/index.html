@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.4.5/bluebird.min.js"></script>
+    </head>
+    <body>
+        <div id="log">
+            You should see promises resolved and continued every 10 seconds if this works correctly.   
+        </div>
+        <script>
+            var el = document.createElement("div");
+            el.style.position = "absolute";
+            document.body.appendChild(el);
+
+            function request(id) {
+                var resolve;
+                var deferred = new Promise(function(r) {
+                    resolve = r;
+                });
+
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState !== 4) {
+                        return;
+                    }
+
+                    var now = new Date();
+                    resolve(now);
+                }
+
+                xhr.open("GET", "http://localhost:3000/api?" + new Date().getTime(), true);
+
+                xhr.send();
+
+                deferred.then(function(readyStateChangeCallbackTime) {
+                    var entry = document.createElement("div");
+                    entry.appendChild(
+                        document.createTextNode("promise " + id + "resolved at " + readyStateChangeCallbackTime + " then continued at " + new Date()));
+
+                    document.getElementById("log").appendChild(entry);
+                }).then(function() {
+                    request(++id);
+                });
+            }
+
+            request(1);
+        </script>
+    </body>
+</html>
